@@ -15,17 +15,15 @@ FROM node:18-alpine AS runner
 WORKDIR /usr/src/app
 
 ENV NODE_ENV=production
-ENV PORT=3000
+ENV PORT=10000
 
-# Copy package descriptors and install production-only dependencies
 COPY package*.json ./
 RUN npm ci --only=production
 
-# Copy compiled NextJS distribution and static assets from builder stage
 COPY --from=builder /usr/src/app/.next ./.next
 COPY --from=builder /usr/src/app/public ./public
+COPY --from=builder /usr/src/app/next.config.js ./next.config.js
 
-EXPOSE 3000
+EXPOSE 10000
 
-# Start Next.js server in production mode
 CMD ["npm", "run", "start"]
