@@ -1,0 +1,62 @@
+databases:
+  - name: astrocrm-db
+    databaseName: astrologer_crm
+    user: astrocrm_user
+    plan: free
+    region: oregon
+
+services:
+  - type: web
+    name: astrocrm-backend
+    runtime: node
+    region: oregon
+    plan: free
+    rootDir: backend
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/app.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: DB_HOST
+        fromDatabase:
+          name: astrocrm-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: astrocrm-db
+          property: port
+      - key: DB_USER
+        fromDatabase:
+          name: astrocrm-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: astrocrm-db
+          property: password
+      - key: DB_NAME
+        fromDatabase:
+          name: astrocrm-db
+          property: database
+      - key: JWT_SECRET
+        generateValue: true
+      - key: LOG_LEVEL
+        value: info
+
+  - type: web
+    name: astrocrm-frontend
+    runtime: node
+    region: oregon
+    plan: free
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_BACKEND_URL
+        fromService:
+          name: astrocrm-backend
+          type: web
+          property: host
