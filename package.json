@@ -1,0 +1,9 @@
+{
+  "name": "astrologer-crm",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build:backend": "cd backend && npm ci && npm run build",
+    "build:frontend": "cd frontend && npm ci && npm run build"
+  }
+}

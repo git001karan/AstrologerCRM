@@ -14,11 +14,12 @@ services:
     rootDir: backend
     buildCommand: npm ci && npm run build
     startCommand: node dist/app.js
+    healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: 5000
+        value: 10000
       - key: DB_HOST
         fromDatabase:
           name: astrocrm-db
@@ -55,8 +56,7 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: PORT
+        value: 10000
       - key: NEXT_PUBLIC_BACKEND_URL
-        fromService:
-          name: astrocrm-backend
-          type: web
-          property: host
+        value: https://astrocrm-backend.onrender.com
