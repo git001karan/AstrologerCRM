@@ -261,7 +261,7 @@ const PORT = process.env.PORT || 5000;
 const startServer = async () => {
   try {
     await testConnection();
-    await runMigrations();
+    await runMigrations().catch((err) => logger.error('Migration failed, continuing anyway', { error: err }));
     server.listen(PORT, () => {
       logger.info(`Server successfully started on port ${PORT}`, { port: PORT, env: process.env.NODE_ENV || 'development' });
     });
