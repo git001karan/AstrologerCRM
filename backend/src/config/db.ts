@@ -1,25 +1,28 @@
-import { Pool } from 'pg';
+import { Pool, PoolConfig } from 'pg';
 import logger from '../utils/logger';
 
-// Load database connection configurations from environment variables.
-// These are typical defaults that will align with our Docker Compose setup.
-const pool = new Pool({
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '5432', 10),
-  database: process.env.DB_NAME || 'astrologer_crm',
-  user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || 'postgres',
-  max: parseInt(process.env.DB_POOL_MAX || '20', 10),
-  idleTimeoutMillis: parseInt(process.env.DB_POOL_IDLE_TIMEOUT || '30000', 10),
-  connectionTimeoutMillis: parseInt(process.env.DB_POOL_CONN_TIMEOUT || '2000', 10),
-});
+const getConfig = (): PoolConfig => {
+  if (process.env.DATABASE_URL) {
+    return {
+      connectionString: process.env.DATABASE_URL,
+      ssl: { rejectUnauthorized: false },
+    };
+  }
+  return {
+    host: process.env.DB_HOST || '127.0.0.1',
+    port: parseInt(process.env.DB_PORT || '5432', 10),
+    database: process.env.DB_NAME || 'astrologer_crm',
+    user: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASSWORD || 'postgres',
+  };
+};
 
-// Log pool errors on idle clients to prevent silent process crashes
+const pool = new Pool(getConfig());
+
 pool.on('error', (err) => {
-  logger.error('Unexpected error on idle PostgreSQL client', { error: err.message, stack: err.stack });
+  logger.error('Unexpected error on idle PostgreSQL client', { error: err.message });
 });
 
-// Helper for testing connection on startup
 export const testConnection = async (): Promise<void> => {
   const client = await pool.connect();
   try {
@@ -30,7 +33,6 @@ export const testConnection = async (): Promise<void> => {
   }
 };
 
-// Runs schema migrations automatically on every startup (idempotent)
 export const runMigrations = async (): Promise<void> => {
   const client = await pool.connect();
   try {
